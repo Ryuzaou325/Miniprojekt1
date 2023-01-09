@@ -78,8 +78,13 @@ public class Flows {
             if (vertexRemarks.get(i).startsWith("Kapazitaet: ")) {
                 Float tempWeight = Float.valueOf(vertexRemarks.get(i).substring(12));
                 String tempName = getVertexName(i) + "'";
-                addVertex(size(), tempName);
-
+                Integer n = size();
+                addVertex(n, tempName);
+                addEdge(i, n, tempWeight);
+                for (Integer j : getNeighbours(i)) {
+                    addEdge(n, j, capacity(i, j));
+//                    deleteEdge(i, j);     // adjacency.get(u).remove(v);
+                }
             }
         }
 
@@ -124,13 +129,13 @@ public class Flows {
         return nodes;
     }
 
-    public int getEdgeCount () { /** Lege private Variable an */
-        int edges = 0;
-        for (int v : nodes)
-            edges += adjacency.get(v).size();
-        edges /= 2;
-        return edges;
-    }
+//    public int getEdgeCount () {
+//        int edges = 0;
+//        for (int v : nodes)
+//            edges += adjacency.get(v).size();
+//        edges /= 2;
+//        return edges;
+//    }
 
 
     public Set<Integer> getNeighbours (Integer v) {
