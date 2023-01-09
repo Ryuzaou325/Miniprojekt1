@@ -6,16 +6,18 @@ public class Flows {
     private HashSet<Integer> nodes;				                // set of vertices of the graph
     private HashMap<Integer, HashMap<Integer,Float>> adjacency; // sparse weighted adjacency matrix of the graph
     private HashMap<Integer, String> vertexNames;               // required for outputting solutions
-    public HashMap<Integer, String> vertexRemarks;             // remarks of certain vertexes
-    public Integer S;                                     // main source of the flow network
-    public Integer Z;                                     // sink of the flow network
+    public HashMap<Integer, String> vertexRemarks;              // remarks of certain vertexes, if any (last column of the table)
+    public Integer S;                                           // main source of the flow network
+    public Integer Z;                                           // sink of the flow network
 
     public Flows (String filename) {
         nodes = new HashSet<Integer>();
         adjacency = new HashMap<Integer, HashMap<Integer,Float>>();
         vertexNames = new HashMap<Integer, String>();
         vertexRemarks = new HashMap<Integer, String>();
-        HashMap<String, Integer> seenIds = new HashMap<String, Integer>();	// only required during construction
+        HashMap<String, Integer> seenIds = new HashMap<String, Integer>();	   // only required during construction
+
+        /**reading the file*/
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             List<String[]> rowList = new ArrayList<String[]>();
@@ -24,28 +26,30 @@ public class Flows {
                 rowList.add(lineItems);
             }
             reader.close();
-            for (int i = 1; i < rowList.get(0).length - 1; i++) {     //setting the vertexes in flow network
-                if (!seenIds.containsKey(rowList.get(0)[i])) {        //making sure each node name appears only once
+
+            /**setting up the initial Flow-Network with given data*/
+            for (int i = 1; i < rowList.get(0).length - 1; i++) {     //set the vertexes in flow network
+                if (!seenIds.containsKey(rowList.get(0)[i])) {        //make sure each node name appears only once
                     seenIds.put(rowList.get(0)[i], i);
                     addVertex(i, rowList.get(0)[i]);
                 } else {
                     System.err.println("Vertex name '" + rowList.get(0)[i] + "' repeated.");
                 }
             }
-            if (seenIds.get("Z") != null) {     //save the integer value in "nodes" of sink "Z"
+            if (seenIds.get("Z") != null) {                                    //save the integer value in "nodes" of sink "Z"
                 Z = seenIds.get("Z");
             } else {
-                System.err.println("Z not found.");    //Program cannot be run without sink
+                System.err.println("Z not found.");                            //Program cannot be run without sink
                 System.exit(0);
             }
             for (int i = 1; i < rowList.size(); i++) {
-                if (!rowList.get(i)[0].equals("Z")) {  //no path starting from sink Z to another node is allowed
+                if (!rowList.get(i)[0].equals("Z")) {                          //no path starting from sink Z to another node is allowed
                     for (int j = 1; j < rowList.get(i).length; j++) {
-                        if (rowList.get(i)[0].equals(getVertexName(i))) {     //check if vertex name in the first column correspond to that in the first row
-                            if (j == rowList.get(i).length - 1) {     //save the remarks on the last column, if any
+                        if (rowList.get(i)[0].equals(getVertexName(i))) {      //check if vertex name in the first column correspond to that in the first row
+                            if (j == rowList.get(i).length - 1) {              //save the remarks on the last column, if any
                                 if (!rowList.get(i)[j].equals("%"))
                                     vertexRemarks.put(i, rowList.get(i)[j]);
-                            } else if (!rowList.get(i)[j].equals("0")) {      //add given edges (weight != 0) in flow network
+                            } else if (!rowList.get(i)[j].equals("0")) {       //add given edges (weight != 0) in flow network
                                 addEdge(i, j, Float.valueOf(rowList.get(i)[j]));
                             }
                         } else {
@@ -54,16 +58,31 @@ public class Flows {
                     }
                 }
             }
-            if (getVertexName(0) == null) {
-                S = 0;
-                addVertex(0, "Source");
-            }
-            //add edges from s to L_
         }
         catch(Exception e){
             System.out.println("Could not locate input file '"+filename+"'.");
             System.exit(0);
         }
+
+        /**Modifying the Flow-Network (1): Adding source S */
+        S = 0;                                            //set 0 as source
+        addVertex(0, "Source");
+        for (Integer i : nodes) {                         //add path from S to all storages (vertex names starting with 'L')
+            if (getVertexName(i).charAt(0) == 'L') {
+                addEdge(S, i, Float.MAX_VALUE);
+            }
+        }
+
+        /**Modifying the Flow-Network (2): Accommodating vertexes with capacities */
+        for (Integer i : vertexRemarks.keySet()) {
+            if (vertexRemarks.get(i).startsWith("Kapazitaet: ")) {
+                Float tempWeight = Float.valueOf(vertexRemarks.get(i).substring(12));
+                String tempName = getVertexName(i) + "'";
+                addVertex(size(), tempName);
+
+            }
+        }
+
     }
 
 //    public void addVertex(Integer v) {
@@ -87,31 +106,31 @@ public class Flows {
         return nodes.size();
     }
 
-//    /** Returns whether the given vertex ID belongs to the graph. */
-//    public boolean contains (Integer v) {
-//        return nodes.contains(v);
-//    }
-//
-//    public int degree (Integer v) {
-//        return adjacency.get(v).size();
-//    }
-//
-//    /** Returns whether vertices v and w are adjacent. */
-//    public boolean adjacent (Integer v, Integer w) {
-//        return adjacency.get(v).containsKey(w);
-//    }
-//
-//    public HashSet<Integer> getVertices () {
-//        return nodes;
-//    }
-//
-//    public int getEdgeCount () { /** Lege private Variable an */
-//        int edges = 0;
-//        for (int v : nodes)
-//            edges += adjacency.get(v).size();
-//        edges /= 2;
-//        return edges;
-//    }
+    /** Returns whether the given vertex ID belongs to the graph. */
+    public boolean contains (Integer v) {
+        return nodes.contains(v);
+    }
+
+    public int degree (Integer v) {
+        return adjacency.get(v).size();
+    }
+
+    /** Returns whether vertices v and w are adjacent. */
+    public boolean adjacent (Integer v, Integer w) {
+        return adjacency.get(v).containsKey(w);
+    }
+
+    public HashSet<Integer> getVertices () {
+        return nodes;
+    }
+
+    public int getEdgeCount () { /** Lege private Variable an */
+        int edges = 0;
+        for (int v : nodes)
+            edges += adjacency.get(v).size();
+        edges /= 2;
+        return edges;
+    }
 
 
     public Set<Integer> getNeighbours (Integer v) {
@@ -119,37 +138,42 @@ public class Flows {
     }
 
 
-//    public float capacity(Integer v, Integer w) {
-//        if (adjacency.get(v).containsKey(w)){
-//            return adjacency.get(v).get(w);
-//        }
-//        else return 0;
-//    }
+    public float capacity(Integer v, Integer w) {
+        if (adjacency.get(v).containsKey(w)){
+            return adjacency.get(v).get(w);
+        }
+        else return 0;
+    }
 
-//    public void setCapacity (Integer v, Integer w, Float c) {
-//        if (adjacency.get(v).containsKey(w)){
-//            adjacency.get(v).put(w,c);
-//        }
-//    }
-//
-//
-//    public void deleteVertex (Integer vertex) {
-//        for (int neighbor : adjacency.get(vertex).keySet())
-//            adjacency.get(neighbor).remove(vertex);
-//        nodes.remove(vertex);
-//        vertexNames.remove(vertex);
-//    }
-//
-//    public void deleteEdge (Integer u, Integer v){
-//        adjacency.get(u).remove(v);
-//    }
+    public void setCapacity (Integer v, Integer w, Float c) {
+        if (adjacency.get(v).containsKey(w)){
+            adjacency.get(v).put(w,c);
+        }
+    }
 
-//    public Integer getKey(String s) {
-//
-//    }
+
+    public void deleteVertex (Integer vertex) {
+        for (int neighbor : adjacency.get(vertex).keySet())
+            adjacency.get(neighbor).remove(vertex);
+        nodes.remove(vertex);
+        vertexNames.remove(vertex);
+    }
+
+    public void deleteEdge (Integer u, Integer v){
+        adjacency.get(u).remove(v);
+    }
+
 
     public String getVertexName (Integer i) {
         return vertexNames.get(i);
+    }
+
+    public Set<String> getVertexNames (Set<Integer> integers) {
+        Set<String> result = new HashSet<>();
+        for (Integer i : integers) {
+            result.add(getVertexName(i) + "(" + i + ")");
+        }
+        return result;
     }
 
 //    public void printNetwork(){
