@@ -7,7 +7,7 @@ public class Flows {
     private HashMap<Integer, HashMap<Integer,Float>> adjacency; // sparse weighted adjacency matrix of the graph
     private HashMap<Integer, String> vertexNames;               // required for outputting solutions
     public HashMap<Integer, String> vertexRemarks;              // remarks of certain vertexes, if any (last column of the table)
-    public Integer S;                                           // main source of the flow network
+    public final Integer S = 0;                                 // main source of the flow network
     public Integer Z;                                           // sink of the flow network
 
     public Flows (String filename) {
@@ -65,8 +65,7 @@ public class Flows {
         }
 
         /**Modifying the Flow-Network (1): Adding source S */
-        S = 0;                                            //set 0 as source
-        addVertex(0, "Source");
+        addVertex(S, "Source");                     //set 0 as source-vertex
         for (Integer i : nodes) {                         //add path from S to all storages (vertex names starting with 'L')
             if (getVertexName(i).charAt(0) == 'L') {
                 addEdge(S, i, Float.MAX_VALUE);
@@ -74,17 +73,22 @@ public class Flows {
         }
 
         /**Modifying the Flow-Network (2): Accommodating vertexes with capacities */
+//        System.out.println("vertexRemarks: " + vertexRemarks);
         for (Integer i : vertexRemarks.keySet()) {
             if (vertexRemarks.get(i).startsWith("Kapazitaet: ")) {
                 Float tempWeight = Float.valueOf(vertexRemarks.get(i).substring(12));
                 String tempName = getVertexName(i) + "'";
                 Integer n = size();
                 addVertex(n, tempName);
-                addEdge(i, n, tempWeight);
+//                System.out.println(getVertexName(i) + ": " + getVertexNames(getNeighbours(i)));
                 for (Integer j : getNeighbours(i)) {
                     addEdge(n, j, capacity(i, j));
-//                    deleteEdge(i, j);     // adjacency.get(u).remove(v);
                 }
+//                System.out.println(getVertexName(n) + ": " + getVertexNames(getNeighbours(n)));
+                adjacency.get(i).clear();
+//                System.out.println(getVertexName(i) + ": " + getVertexNames(getNeighbours(i)));
+                addEdge(i, n, tempWeight);
+//                System.out.println(getVertexName(i) + ": " + getVertexNames(getNeighbours(i)));
             }
         }
 

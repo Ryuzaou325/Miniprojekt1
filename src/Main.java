@@ -3,7 +3,7 @@ public class Main {
         Flows g = new Flows(args[0]);
 
         //testing...
-        System.out.println(g.vertexRemarks);
+        System.out.println("vertexRemarks: " + g.vertexRemarks);
         System.out.print("Neighbours of " + g.getVertexName(1) + "(1): ");
         System.out.println(g.getVertexNames(g.getNeighbours(1)));
         System.out.print("Neighbours of " + g.getVertexName(30) + "(30): ");
@@ -17,6 +17,14 @@ public class Main {
         System.out.print("Neighbours of " + g.getVertexName(84) + "(84): ");
         System.out.println(g.getVertexNames(g.getNeighbours(84)));
         System.out.println("Neighbours of S(" + g.S + "): " + g.getVertexNames(g.getNeighbours(g.S)));
+        System.out.println("Size: " + g.size());
+        System.out.println("Neighbours of " + g.getVertexName(g.size() - 1) + "(" + (g.size() - 1) + "): " + g.getVertexNames(g.getNeighbours(g.size() - 1) ));
+        System.out.print("respective edge weights (" + (g.size() - 1) + ",neighbour): ");
+        for (Integer i : g.getNeighbours(g.size() - 1)) {
+            System.out.print("(" + (g.size() - 1)  + "," + i + ")=" + g.capacity(g.size() - 1, i) + " ");
+        }
+        System.out.println();
+        System.out.println("(KP115,KP115') = (115,128) = " + g.capacity(115,128));
 
         /* output:
         {66=Kapazitaet: 73, 4=Kapazitaet: 17, 101=Kapazitaet: 84, 102=Kapazitaet: 75, 72=Kapazitaet: 73, 10=Hier ist es sehr kalt, 43=Standort von Rudolphs Ferienwohnung, 111=Kapazitaet: 99, 17=Kapazitaet: 69, 50=Kapazitaet: 49, 114=Kapazitaet: 59, 115=Kapazitaet: 31, 93=Lebkuchenfabrik}
