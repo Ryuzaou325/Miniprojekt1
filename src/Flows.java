@@ -133,13 +133,13 @@ public class Flows {
         return nodes;
     }
 
-//    public int getEdgeCount () {
-//        int edges = 0;
-//        for (int v : nodes)
-//            edges += adjacency.get(v).size();
-//        edges /= 2;
-//        return edges;
-//    }
+    public int getEdgeCount () {
+        int edges = 0;
+        for (int v : nodes)
+            edges += adjacency.get(v).size();
+        edges /= 2;
+        return edges;
+    }
 
 
     public Set<Integer> getNeighbours (Integer v) {

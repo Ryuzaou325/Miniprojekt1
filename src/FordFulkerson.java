@@ -26,7 +26,7 @@ public class FordFulkerson {
         }
         while (augment()){
             val = val+b;
-            System.out.println("Current flow value "+val);
+//            System.out.println("Current flow value "+val);
         }
 	/*
 	HashMap<Integer,Float> outflow = new HashMap<Integer,Float>();
@@ -58,7 +58,7 @@ public class FordFulkerson {
         b = Float.MAX_VALUE;
         if (DFS(g.S,visited)){//residual graph has augmenting path
             //update flow and residual graph
-            System.out.println("Found augmenting path, increasing flow by "+b);
+//            System.out.println("Found augmenting path, increasing flow by "+b);
             Integer prev = g.S;
             for (Integer v: P){
                 if (v==g.S) continue;
