@@ -134,10 +134,13 @@ public class Flows {
     }
 
     public int getEdgeCount () {
+//        System.out.println("--edge count--");
         int edges = 0;
-        for (int v : nodes)
+        for (int v : nodes) {
             edges += adjacency.get(v).size();
-        edges /= 2;
+//            System.out.println(v + ": " + adjacency.get(v));
+        }
+//        System.out.println("--------------");
         return edges;
     }
 
@@ -161,11 +164,16 @@ public class Flows {
     }
 
 
-    public void deleteVertex (Integer vertex) {
-        for (int neighbor : adjacency.get(vertex).keySet())
-            adjacency.get(neighbor).remove(vertex);
-        nodes.remove(vertex);
-        vertexNames.remove(vertex);
+    public void deleteVertex (Integer vertex) {          //HashMap<Integer, HashMap<Integer,Float>> adjacency
+        System.out.println("Deleting L2...");
+        System.out.println(adjacency.get(vertex));
+//        for (int neighbor : adjacency.get(vertex).keySet())
+//            adjacency.get(neighbor).remove(vertex);
+        adjacency.get(vertex).clear();
+        System.out.println(adjacency.get(vertex));
+//        nodes.remove(vertex);
+//        vertexNames.remove(vertex);
+        System.out.println("..............");
     }
 
     public void deleteEdge (Integer u, Integer v){

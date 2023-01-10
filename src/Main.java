@@ -1,8 +1,7 @@
 public class Main {
     public static void main(String[] args) {
-        Flows g = new Flows(args[0]);
-
         //testing...
+        Flows g = new Flows(args[0]);
         System.out.println("vertexRemarks: " + g.vertexRemarks);
         System.out.print("Neighbours of " + g.getVertexName(1) + "(1): ");
         System.out.println(g.getVertexNames(g.getNeighbours(1)));
@@ -28,22 +27,25 @@ public class Main {
 
 
         /**Solution 1*/
+        Flows g1 = new Flows(args[0]);
         System.out.println();
         System.out.println("SOLUTION 1");
         System.out.println("==========");
-        FordFulkerson algo1 = new FordFulkerson(g);
-        System.out.println("Edge Count: " + g.getEdgeCount());
+        FordFulkerson algo1 = new FordFulkerson(g1);
+        System.out.println("Edge Count: " + g1.getEdgeCount());
         float maxFlow1 = algo1.computeMaxFlow();
         System.out.println("Max flow value: " + maxFlow1);
         System.out.println("Anzahl von Runden (1000 Geschenke): " + Math.ceil(1000 / maxFlow1));
 
         /**Solution 2*/
         System.out.println();
+        Flows g2 = new Flows(args[0]);
+        float maxFlow2 = 0f;
         System.out.println("SOLUTION 2 (without L2)");
         System.out.println("==========");
         Integer L2 = -1;
-        for (Integer i = 1; i < g.size(); i++) {
-            if (g.getVertexName(i).equals("L2")) {
+        for (Integer i = 1; i < g2.size(); i++) {
+            if (g2.getVertexName(i).equals("L2")) {
                 L2 = i;
                 break;
             }
@@ -51,14 +53,22 @@ public class Main {
         if (L2 == -1)
             System.out.println("Nil. (No 'L2' storage found.)");
         else {
-            g.deleteVertex(L2);
-            FordFulkerson algo2 = new FordFulkerson(g);
-            System.out.println("Edge Count: " + g.getEdgeCount());
-            float maxFlow2 = algo2.computeMaxFlow();
+            g2.deleteVertex(L2);
+            FordFulkerson algo2 = new FordFulkerson(g2);
+            System.out.println("Edge Count: " + g2.getEdgeCount());
+            maxFlow2 = algo2.computeMaxFlow();
             System.out.println("Max flow value: " + maxFlow2);
             System.out.println("Anzahl von Runden (1000 Geschenke): " + Math.ceil(1000 / maxFlow2));
         }
 
+        System.out.println();
+        System.out.println("RESULT");
+        System.out.println("======");
+        if (maxFlow2 >= maxFlow1) {
+            System.out.println("L2 can be removed.");
+        } else {
+            System.out.println("L2 should be kept.");
+        }
     }
 }
 
@@ -76,5 +86,23 @@ Neighbours of KP115'(128): [KP85(85), KP91(91), KP33(33), KP5(5), KP23(23), KP10
 respective edge weights (128,neighbour): (128,33)=54.0 (128,97)=44.0 (128,100)=31.0 (128,5)=20.0 (128,85)=85.0 (128,23)=88.0 (128,11)=80.0 (128,91)=64.0
 (KP115,KP115') = (115,128) = 31.0
 
+SOLUTION 1
+==========
+Edge Count: 627
 Max flow value: 157.0
+Anzahl von Runden (1000 Geschenke): 7.0
+
+SOLUTION 2 (without L2)
+==========
+Deleting L2...
+{67=33.0, 21=35.0, 73=98.0, 106=95.0, 30=49.0, 62=40.0, 78=9.0}
+{}
+..............
+Edge Count: 620
+Max flow value: 157.0
+Anzahl von Runden (1000 Geschenke): 7.0
+
+RESULT
+======
+L2 can be removed.
 */
