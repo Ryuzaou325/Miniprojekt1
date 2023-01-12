@@ -1,50 +1,43 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
+import java.io.IOException;
 
 public class ApplicationMain extends JDialog {
 
-    private static final long serialVersionUID = 1L;
-    public ApplicationMain()
-    {
-        //Create a frame
-
-        Frame f = new Frame();
-        f.setSize(500, 300);
-
-        //Prepare font
-        Font font = new Font( "SansSerif", Font.PLAIN, 22 );
-
-        //Write something
-        Label label = new Label("Santa's Gift Loading System");
-        label.setForeground(Color.RED);
-        label.setFont(font);
-        f.add(label);
-
-        Button button = new Button("RUN!");
-        button.setBounds(200, 150, 90, 50);
-
-        f.add(button);
-
-        // sets 500 width and 600 height
-
-        // uses no layout managers
-        f.setLayout(null);
-
-
-
-
-        //Make visible
-        f.setVisible(true);
-        f.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
+    private static void createWindow() {
+        JFrame frame = new JFrame("Swing Tester");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        createUI(frame);
+        frame.setSize(560, 200);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
-    public static void main(final String[] args)
-    {
-        new ApplicationMain();
+
+
+
+    private static void createUI(final JFrame frame){
+        JPanel panel = new JPanel();
+        LayoutManager layout = new BoxLayout(panel, BoxLayout.PAGE_AXIS);
+        panel.setLayout(layout);
+
+
+        String inputPath = JOptionPane.showInputDialog("Type in the path of the .csv file");
+        String outputPath = "The .csv file is saved under: " + inputPath;
+        JOptionPane.showMessageDialog(null, outputPath);
+
+
+        String inputWarehouse = JOptionPane.showInputDialog("How many warehouses?");
+        String outputWarehouse = inputWarehouse + " warehouses in total";
+        JOptionPane.showMessageDialog(null, outputWarehouse);
+
+
+        panel.add(new JButton("RUN!"));
+        frame.getContentPane().add(panel, BorderLayout.SOUTH);
+    }
+
+
+    public static void main(String[] args) {
+        createWindow();
     }
 }
