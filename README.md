@@ -1,0 +1,3 @@
+# Miniprojekt1
+
+##Anwendungserklärung
