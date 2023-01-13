@@ -1,6 +1,7 @@
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 public class FordFulkerson {
 
@@ -69,7 +70,6 @@ public class FordFulkerson {
                     flow.get(prev).put(v,fe+b);
                     Float c = g.capacity(prev,v);
                     if (c<=b+0.01){
-                        //System.out.println("removing edge from residual graph");
                         g.deleteEdge(prev,v);
                     }
                     else {
@@ -85,7 +85,7 @@ public class FordFulkerson {
                 }
                 else {//network edge goes from v to prev , so eR ∈ E : f (eR ) ← f (eR ) − b
                     float fe = flow.get(v).get(prev);
-                    flow.get(v).put(prev,fe-b);
+                    flow.get(v).put(prev,fe+b);
                     //check if edge from v to prev is in the residual graph
                     if (g.adjacent(v,prev)){
                         Float c = g.capacity(v,prev);
@@ -127,10 +127,29 @@ public class FordFulkerson {
                         b = Math.min(b,g.capacity(v,u));
                         return true;
                     }
-
                 }
             }
             return false;
         }
+    }
+
+    public Float getEdgeFlow(Integer i, Integer j) {
+        return flow.get(i).get(j);
+    }
+
+    public Set<Set<Integer>> showUselessFlowEdges () {
+
+        Set<Set<Integer>> edges = new HashSet<>();
+        for (Integer i : flow.keySet()) {
+            for (Integer j : flow.get(i).keySet()) {
+                if (getEdgeFlow(i, j) == 0.0) {
+                    HashSet<Integer> temp = new HashSet<Integer>();
+                    temp.add(i);
+                    temp.add(j);
+                    edges.add(temp);
+                }
+            }
+        }
+        return edges;
     }
 }

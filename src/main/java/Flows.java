@@ -3,18 +3,15 @@ import java.io.FileReader;
 import java.util.*;
 
 public class Flows {
-    private HashSet<Integer> nodes;				                // set of vertices of the graph
-    private HashMap<Integer, HashMap<Integer,Float>> adjacency; // sparse weighted adjacency matrix of the graph
-    private HashMap<Integer, String> vertexNames;               // required for outputting solutions
-    public HashMap<Integer, String> vertexRemarks;              // remarks of certain vertexes, if any (last column of the table)
-    public final Integer S = 0;                                 // main source of the flow network
+    private final HashMap<Integer, Vertex> vertices;			                    // set of vertices of the graph
+    private final HashMap<Integer, HashMap<Integer,Float>> adjacency; // sparse weighted adjacency matrix of the graph
+    public final Integer S = 0;                                 // main source of the flow network (irrelevant)
     public Integer Z;                                           // sink of the flow network
 
     public Flows (String filename) {
-        nodes = new HashSet<Integer>();
         adjacency = new HashMap<Integer, HashMap<Integer,Float>>();
-        vertexNames = new HashMap<Integer, String>();
-        vertexRemarks = new HashMap<Integer, String>();
+        vertices = new HashMap<Integer, Vertex>();
+        Set<Integer> remarkIds = new HashSet<Integer>();
         HashMap<String, Integer> seenIds = new HashMap<String, Integer>();	   // only required during construction
 
         /**reading the file*/
@@ -22,7 +19,7 @@ public class Flows {
             String line;
             List<String[]> rowList = new ArrayList<String[]>();
             while ((line = reader.readLine()) != null) {
-                String[] lineItems = line.split(",");
+                String[] lineItems = line.split(";");
                 rowList.add(lineItems);
             }
             reader.close();
@@ -31,7 +28,7 @@ public class Flows {
             for (int i = 1; i < rowList.get(0).length - 1; i++) {     //set the vertexes in flow network
                 if (!seenIds.containsKey(rowList.get(0)[i])) {        //make sure each node name appears only once
                     seenIds.put(rowList.get(0)[i], i);
-                    addVertex(i, rowList.get(0)[i]);
+                    addVertex(i, rowList.get(0)[i], "");
                 } else {
                     System.err.println("Vertex name '" + rowList.get(0)[i] + "' repeated.");
                 }
@@ -43,12 +40,14 @@ public class Flows {
                 System.exit(0);
             }
             for (int i = 1; i < rowList.size(); i++) {
-                if (!rowList.get(i)[0].equals("Z")) {                          //no path starting from sink Z to another node is allowed
+                if (!rowList.get(i)[0].equals("A")) {                          //no path starting from sink Z to another node is allowed
                     for (int j = 1; j < rowList.get(i).length; j++) {
                         if (rowList.get(i)[0].equals(getVertexName(i))) {      //check if vertex name in the first column correspond to that in the first row
                             if (j == rowList.get(i).length - 1) {              //save the remarks on the last column, if any
-                                if (!rowList.get(i)[j].equals("%"))
-                                    vertexRemarks.put(i, rowList.get(i)[j]);
+                                if (!rowList.get(i)[j].equals("%")) {
+                                    remarkIds.add(i);
+                                    vertices.get(i).changeRemarkTo(rowList.get(i)[j]);
+                                }
                             } else if (!rowList.get(i)[j].equals("0")) {       //add given edges (weight != 0) in flow network
                                 addEdge(i, j, Float.valueOf(rowList.get(i)[j]));
                             }
@@ -65,21 +64,21 @@ public class Flows {
         }
 
         /**Modifying the Flow-Network (1): Adding source S */
-        addVertex(S, "Source");                     //set 0 as source-vertex
-        for (Integer i : nodes) {                         //add path from S to all storages (vertex names starting with 'L')
-            if (getVertexName(i).charAt(0) == 'L') {
-                addEdge(S, i, Float.MAX_VALUE);
+        addVertex(0, "S", "Source");                     //set 0 as source-vertex
+        for (Vertex loopVertex : vertices.values()) {                         //add path from S to all storages (vertex names starting with 'L')
+            if (loopVertex.name.charAt(0) == 'L') {
+                addEdge(S, loopVertex.id, Float.MAX_VALUE);
             }
         }
 
         /**Modifying the Flow-Network (2): Accommodating vertexes with capacities */
 //        System.out.println("vertexRemarks: " + vertexRemarks);
-        for (Integer i : vertexRemarks.keySet()) {
-            if (vertexRemarks.get(i).startsWith("Kapazitaet: ")) {
-                Float tempWeight = Float.valueOf(vertexRemarks.get(i).substring(12));
+        for (Integer i : remarkIds) {
+            if (vertices.get(i).name.startsWith("Kapazitaet: ")) {
+                Float tempWeight = Float.valueOf(vertices.get(i).name.substring(12));
                 String tempName = getVertexName(i) + "'";
                 Integer n = size();
-                addVertex(n, tempName);
+                addVertex(n, tempName, "");
 //                System.out.println(getVertexName(i) + ": " + getVertexNames(getNeighbours(i)));
                 for (Integer j : getNeighbours(i)) {
                     addEdge(n, j, capacity(i, j));
@@ -100,9 +99,8 @@ public class Flows {
 //        adjacency.put(v, new HashMap<Integer,Float>());
 //    }
 
-    public void addVertex(Integer v, String name) {
-        nodes.add(v);
-        vertexNames.put(v,name);
+    public void addVertex (Integer v, String name, String remark) {
+        vertices.put(v, new Vertex(v, name, remark));
         adjacency.put(v, new HashMap<Integer,Float>());
     }
 
@@ -112,12 +110,12 @@ public class Flows {
     }
 
     public int size () {
-        return nodes.size();
+        return vertices.size();
     }
 
     /** Returns whether the given vertex ID belongs to the graph. */
     public boolean contains (Integer v) {
-        return nodes.contains(v);
+        return getVertices().contains(v);
     }
 
     public int degree (Integer v) {
@@ -129,18 +127,14 @@ public class Flows {
         return adjacency.get(v).containsKey(w);
     }
 
-    public HashSet<Integer> getVertices () {
-        return nodes;
-    }
+    public Set<Integer> getVertices () { return vertices.keySet(); }
 
     public int getEdgeCount () {
 //        System.out.println("--edge count--");
         int edges = 0;
-        for (int v : nodes) {
-            edges += adjacency.get(v).size();
-//            System.out.println(v + ": " + adjacency.get(v));
+        for (Vertex loopVertex : vertices.values()) {
+            edges += adjacency.get(loopVertex.id).size();
         }
-//        System.out.println("--------------");
         return edges;
     }
 
@@ -163,7 +157,6 @@ public class Flows {
         }
     }
 
-
     public void deleteVertex (Integer vertex) {          //HashMap<Integer, HashMap<Integer,Float>> adjacency
         System.out.println("Deleting L2...");
         System.out.println(adjacency.get(vertex));
@@ -180,17 +173,18 @@ public class Flows {
         adjacency.get(u).remove(v);
     }
 
-
     public String getVertexName (Integer i) {
-        return vertexNames.get(i);
+
+        return vertices.get(i).name;
     }
 
     public Set<String> getVertexNames (Set<Integer> integers) {
-        Set<String> result = new HashSet<>();
+
+        Set<String> vNames = new HashSet<String>();
         for (Integer i : integers) {
-            result.add(getVertexName(i) + "(" + i + ")");
+            vNames.add(getVertexName(i));
         }
-        return result;
+        return vNames;
     }
 
 //    public void printNetwork(){

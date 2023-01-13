@@ -1,8 +1,8 @@
 public class Main {
     public static void main(String[] args) {
         //testing...
-        Flows g = new Flows(args[0]);
-        System.out.println("vertexRemarks: " + g.vertexRemarks);
+        String inputFile = "in\\Roehrentransportsystem.csv";
+        Flows g = new Flows(inputFile);
         System.out.print("Neighbours of " + g.getVertexName(1) + "(1): ");
         System.out.println(g.getVertexNames(g.getNeighbours(1)));
         System.out.print("Neighbours of " + g.getVertexName(30) + "(30): ");
@@ -27,7 +27,7 @@ public class Main {
 
 
         /**Solution 1*/
-        Flows g1 = new Flows(args[0]);
+        Flows g1 = new Flows(inputFile);
         System.out.println();
         System.out.println("SOLUTION 1");
         System.out.println("==========");
@@ -39,7 +39,7 @@ public class Main {
 
         /**Solution 2*/
         System.out.println();
-        Flows g2 = new Flows(args[0]);
+        Flows g2 = new Flows(inputFile);
         float maxFlow2 = 0f;
         System.out.println("SOLUTION 2 (without L2)");
         System.out.println("==========");
@@ -68,6 +68,18 @@ public class Main {
             System.out.println("L2 can be removed.");
         } else {
             System.out.println("L2 should be kept.");
+        }
+
+        System.out.println();
+        System.out.println("Checking if edges can be deleted such that flow is unaffected");
+        System.out.println("======");
+        if (algo1.showUselessFlowEdges().size() != 0) {
+            System.out.println("Following edges can be deleted:");
+            System.out.println(algo1.showUselessFlowEdges());
+            System.out.println("# of deletable edges: " + algo1.showUselessFlowEdges().size());
+        }
+        else {
+            System.out.println("no edge can be removed");
         }
     }
 }
