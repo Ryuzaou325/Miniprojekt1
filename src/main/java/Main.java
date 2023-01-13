@@ -1,7 +1,7 @@
 public class Main {
     public static void main(String[] args) {
         //testing...
-        String inputFile = "in\\Roehrentransportsystem.csv";
+        String inputFile = "/Users/solidaneziri/Downloads/Roehrentransportsystem.csv";
         Flows g = new Flows(inputFile);
         System.out.print("Neighbours of " + g.getVertexName(1) + "(1): ");
         System.out.println(g.getVertexNames(g.getNeighbours(1)));

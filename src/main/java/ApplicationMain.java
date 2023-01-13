@@ -26,14 +26,9 @@ public class ApplicationMain extends JDialog {
         String outputPath = "The .csv file is saved under: " + inputPath;
         JOptionPane.showMessageDialog(null, outputPath);
 
-
-        String inputWarehouse = JOptionPane.showInputDialog("How many warehouses?");
-        String outputWarehouse = inputWarehouse + " warehouses in total";
-        JOptionPane.showMessageDialog(null, outputWarehouse);
-
-
         panel.add(new JButton("RUN!"));
         frame.getContentPane().add(panel, BorderLayout.SOUTH);
+
     }
 
 
